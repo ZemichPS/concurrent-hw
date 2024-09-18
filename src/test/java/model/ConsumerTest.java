@@ -15,11 +15,11 @@ class ConsumerTest {
 
     private Consumer consumer;
     private Topic topic;
-    private List<String> eventList = new ArrayList<>();
-    private CountDownLatch latch = new CountDownLatch(1);
+    private final List<String> eventList = new ArrayList<>();
+    private final CountDownLatch latch = new CountDownLatch(1);
 
     @BeforeEach
-    void init(){
+    void init() {
         topic = new Topic("OrderCanceledEvent", 1);
         consumer = new Consumer(topic, 14, latch, eventList);
     }

@@ -2,21 +2,22 @@ package model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.*;
 
 public class Topic {
+
     private final String name;
     private final List<String> messages = new ArrayList<>();
+
     private final Lock lock = new ReentrantLock();
     private final Condition newMessageCondition = lock.newCondition();
-    private final int maxConsumers;
-    private int currentConsumers = 0;
+
+    private final Semaphore slots;
 
     public Topic(String name, int maxConsumers) {
         this.name = name;
-        this.maxConsumers = maxConsumers;
+        this.slots = new Semaphore(maxConsumers);
     }
 
     public String getName() {
@@ -34,36 +35,21 @@ public class Topic {
     }
 
     public String consume(int lastReadIndex) throws InterruptedException {
-        lock.lock();
+        slots.acquire();
         try {
-            while (lastReadIndex >= messages.size()) {
-                newMessageCondition.await();
+            lock.lock();
+            try {
+                while (lastReadIndex >= messages.size()) {
+                    while (lastReadIndex >= messages.size()) {
+                        newMessageCondition.await();
+                    }
+                }
+                return messages.get(lastReadIndex);
+            } finally {
+                lock.unlock();
             }
-            return messages.get(lastReadIndex);
         } finally {
-            lock.unlock();
-        }
-    }
-
-    public boolean acquireConsumerSlot() {
-        lock.lock();
-        try {
-            if (currentConsumers < maxConsumers) {
-                currentConsumers++;
-                return true;
-            }
-            return false;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public void releaseConsumerSlot() {
-        lock.lock();
-        try {
-            currentConsumers--;
-        } finally {
-            lock.unlock();
+            slots.release();
         }
     }
 }

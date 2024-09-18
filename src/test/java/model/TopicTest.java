@@ -19,24 +19,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TopicTest {
 
-    TopicService topicService = new TopicServiceImpl();
-    private String topicName = "Breaking news";
-    CountDownLatch latch;
-    Topic topic;
-    List<String> consumedMessages;
-    ExecutorService executorService;
-
+    private final String topicName = "Breaking news";
+    private Topic topic;
 
     @BeforeEach
     public void init() {
         topic = new Topic(topicName, 3);
-        latch = new CountDownLatch(2);
-        consumedMessages = new ArrayList<>();
-        executorService = Executors.newFixedThreadPool(2);
     }
 
     @Test
-    @DisplayName("Should return topic name")
+    @DisplayName("Should return correct topic name")
     void getName() {
         Assertions.assertEquals(topicName, topic.getName());
     }
@@ -55,27 +47,5 @@ class TopicTest {
         String message = "Locals urging us to put phones away";
         topic.publish(message);
         Assertions.assertEquals(message, topic.consume(0));
-    }
-
-    @Test
-    @DisplayName("Topic must ")
-    void acquireConsumerSlot() throws InterruptedException {
-
-        Stream.generate(() -> new Consumer(topic, new Random().nextInt(), latch, consumedMessages))
-                .limit(2)
-                .forEach(executorService::submit);
-        topic.publish("Exploding walkie-talkies kill nine and injure at least 300 in new attacks across Lebanon");
-        latch.await();
-        Assertions.assertEquals(2, consumedMessages.size());
-    }
-
-    @Test
-    void releaseConsumerSlot() throws InterruptedException {
-        Stream.generate(() -> new Consumer(topic, new Random().nextInt(), latch, consumedMessages))
-                .limit(2)
-                .forEach(executorService::submit);
-        topic.publish("More explosions, more deaths, and more questions");
-        latch.await();
-        Assertions.assertEquals(2, consumedMessages.size());
     }
 }

@@ -20,9 +20,13 @@ class TopicServiceImplTest {
     }
 
     @Test
-    @DisplayName("Service must return exists topic by name")
+    @DisplayName("Service must return exists topic by name otherwise throw RuntimeException")
     void getByName() {
         topicService.create("orderCreatedEvent", 2);
-        Assertions.assertNotNull(topicService.getByName("orderCreatedEvent"));
+        Assertions.assertAll(
+                () -> Assertions.assertNotNull(topicService.getByName("orderCreatedEvent")),
+                () -> Assertions.assertThrows(RuntimeException.class, () -> topicService.getByName("orderDeliveredEvent"))
+        );
+
     }
 }
