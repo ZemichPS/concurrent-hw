@@ -25,7 +25,6 @@ public class Main {
                 .limit(3)
                 .forEach(executorService::submit);
 
-
         getNews().forEach(topic::publish);
 
         latch.await();
