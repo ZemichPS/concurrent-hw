@@ -6,6 +6,7 @@ import service.impl.TopicServiceImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Stack;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,6 +17,7 @@ import static java.lang.Thread.sleep;
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         Random random = new Random();
+
         TopicService topicService = new TopicServiceImpl();
         topicService.create("news", 2);
         Topic topic = topicService.getByName("news");
